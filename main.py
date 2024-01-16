@@ -44,9 +44,35 @@ def cart_addition(corrals):
     while True: 
         random_corral = random.choice(list(corrals.keys()))
         corrals[random_corral].append('x')
-        print(f'cart added to {random_corral}')
+        #print(f'cart added to {random_corral}')
         time.sleep(2)
 
+'''
+FUNCTION 2.b: cart_subtraction 
+This function will randomly add a cart to a corral every 2 seconds 
+'''
+def cart_subtraction(qty_cart_pushers,pad, corrals): 
+    while True: 
+        for worker in range(qty_cart_pushers): # for now, this qty is just a number, not specific workers (this feature to be implemented later)
+            '''
+            I want to have a worker randomly select a corral to pick and take carts from, as soon as corral 
+            So the logic should be: 
+                1. randomly select a corral from corrals
+                2. check if corral has at least 10 carts 
+                3. remove 6 carts from corral 
+            '''
+            random_key = random.choice(list(corrals.keys())) #random.choice() returns a random element from a list, so need to cast corrals.keys() as a list
+            
+            corrals[random_key] = corrals[random_key][:-7] # the worker takes the last seven carts from corral
+            
+            #adding those 7 carts remove from the corral above to the pad: 
+            for i in range(7): 
+                pad.append('x')
+
+            print(f'7 carts cleared from {random_key}.')
+            time.sleep(5) # wait 5 seconds before the next worker retrieves 7 carts from randomly selected corral 
+            
+    
 
 def main ():  
     #grabbing parameters for cart simulation
@@ -56,7 +82,8 @@ def main ():
     print(f'there are {len(corrals)} corrals in the lot')
 
     cart_addition(corrals)
-    
+    cart_subtraction(qty_cart_pushers = cart_pushers,pad = pad, corrals = corrals)
+
 if __name__ == '__main__':
 
     main() 
