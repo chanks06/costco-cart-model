@@ -44,13 +44,14 @@ def cart_addition(corrals):
     while True: 
         random_corral = random.choice(list(corrals.keys()))
         corrals[random_corral].append('x')
-        #print(f'cart added to {random_corral}')
-        time.sleep(2)
+        print(f'cart added to {random_corral}')
+        time.sleep(1)
 
 '''
 FUNCTION 2.b: cart_subtraction 
-This function will randomly add a cart to a corral every 2 seconds 
+This function will randomly add a cart to a corral every 5 seconds 
 '''
+
 def cart_subtraction(qty_cart_pushers,pad, corrals): 
     while True: 
         for worker in range(qty_cart_pushers): # for now, this qty is just a number, not specific workers (this feature to be implemented later)
