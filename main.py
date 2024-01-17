@@ -3,8 +3,13 @@
 #libraries:
 import time 
 import random 
+import threading
+import keyboard 
 
 # PART 1: MODEL SET UP 
+
+stop_threads = False 
+
 '''
 FUNCTION 1.a: PARAMETERS 
 Parameter retrieval function: ask the user the following questions:
@@ -15,8 +20,8 @@ Parameter retrieval function: ask the user the following questions:
 def model_init(): 
     print('Welcome to the Costco Warehouse #97 Parking Lot.') #welcome the user 
     
-    qty_cart_pushers = input('How many cart pushers are working (0 - 6) ?    ')
-    busy_rating = input('How busy is the warehouse (0 - 10) ?    ')
+    qty_cart_pushers = int(input('How many cart pushers are working (0 - 6) ?    '))
+    busy_rating = int(input('How busy is the warehouse (0 - 10) ?    '))
 
     return qty_cart_pushers, busy_rating
 
@@ -30,9 +35,19 @@ def lot_builder():
     corrals = {} # var corrals is a dictionary of lists 
     
     for i in range(0,22): # creating 22 empty corrals 
-        corrals[f'corral_{i+1}'] = list()
+        corrals[f'corral_{i+1}'] = list('x'*10)
 
     return pad, corrals
+
+'''
+FUNCTION 1.c: STOP THREADS
+This function is to stop the program and to display the resulting parking lot 
+'''
+
+def push_to_stop():
+    global stop_threads 
+    keyboards.wait('s')
+    stop_threads = True
 
 # PART 2: MODEL OPERATION
 '''
@@ -64,13 +79,14 @@ def cart_subtraction(qty_cart_pushers,pad, corrals):
             '''
             random_key = random.choice(list(corrals.keys())) #random.choice() returns a random element from a list, so need to cast corrals.keys() as a list
             
-            corrals[random_key] = corrals[random_key][:-7] # the worker takes the last seven carts from corral
+            if len(corrals[random_key]) >= 7:
             
-            #adding those 7 carts remove from the corral above to the pad: 
-            for i in range(7): 
-                pad.append('x')
+                corrals[random_key] = corrals[random_key][:-7] # the worker takes the last seven carts from corral
+                                                              #adding those 7 carts remove from the corral above to the pad: 
+                print(f'7 carts cleared from {random_key}.')
+            else: 
+                pass
 
-            print(f'7 carts cleared from {random_key}.')
             time.sleep(5) # wait 5 seconds before the next worker retrieves 7 carts from randomly selected corral 
             
     
@@ -81,9 +97,23 @@ def main ():
     #print(f'There are {cart_pushers} cart pushers and the warehouse busy rating is {busy_rating}.')
     pad, corrals = lot_builder() 
     print(f'there are {len(corrals)} corrals in the lot')
+    
+    for corral_key, corral_value in corrals.items(): # displaying initial set of corrals 
+        print(f'{corral_key}: {corral_value}')
 
-    cart_addition(corrals)
-    cart_subtraction(qty_cart_pushers = cart_pushers,pad = pad, corrals = corrals)
+    time.sleep(10)
+
+    #begin parking lot sequence w/ threading 
+
+    thread_addition = threading.Thread(target=cart_addition, args = (corrals,))
+    thread_subtraction = threading.Thread(target=cart_subtraction, args = (cart_pushers, pad, corrals))
+
+    thread_addition.start()
+    thread_subtraction.start()
+
+    thread_addition.join()
+    thread_subtraction.join()
+
 
 if __name__ == '__main__':
 
