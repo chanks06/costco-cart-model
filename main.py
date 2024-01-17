@@ -4,11 +4,12 @@
 import time 
 import random 
 import threading
-import keyboard 
+import keyboard
+ 
 
 # PART 1: MODEL SET UP 
 
-stop_threads = False 
+
 
 '''
 FUNCTION 1.a: PARAMETERS 
@@ -25,8 +26,19 @@ def model_init():
 
     return qty_cart_pushers, busy_rating
 
+
 '''
-FUNCTION 1.b: CREATE CORRALS
+FUNCTION 1.b: DISPLAY LOT 
+when called this function displays current state of parking lot corrals 
+'''
+
+def display_lot(corrals):
+    for corral_key, corral_value in corrals.items(): 
+        print(f'{corral_key}: {corral_value}')
+
+
+'''
+FUNCTION 1.c: CREATE CORRALS
 There are 22 corrals on site, each with a capacity of 24 carts (before considered overflowing)
 There is 1 pad, which has a initial number of carts of 24 * 4 = 96
 '''
@@ -40,27 +52,36 @@ def lot_builder():
     return pad, corrals
 
 '''
-FUNCTION 1.c: STOP THREADS
+FUNCTION 1.d: STOP THREADS
 This function is to stop the program and to display the resulting parking lot 
 '''
 
+stop_event = threading.Event() 
+
 def push_to_stop():
     global stop_threads 
-    keyboards.wait('s')
-    stop_threads = True
+    try: 
+        keyboard.wait('s')
+        stop_event.set()
+    except Exception as e: 
+        print("error")
+
+
 
 # PART 2: MODEL OPERATION
+    
 '''
 FUNCTION 2.a: cart_addition 
 This function will randomly add a cart to a corral every 2 seconds 
 '''
-
 def cart_addition(corrals): 
     while True: 
         random_corral = random.choice(list(corrals.keys()))
         corrals[random_corral].append('x')
         print(f'cart added to {random_corral}')
         time.sleep(1)
+
+
 
 '''
 FUNCTION 2.b: cart_subtraction 
@@ -91,17 +112,25 @@ def cart_subtraction(qty_cart_pushers,pad, corrals):
             
     
 
+
+
+#main 
 def main ():  
+    
+
+    #starting push_to_stop to listen for keyboard 's' press: 
+    key_thread = threading.Thread(target = push_to_stop)
+    key_thread.start()
+
     #grabbing parameters for cart simulation
     cart_pushers, busy_rating = model_init()
-    #print(f'There are {cart_pushers} cart pushers and the warehouse busy rating is {busy_rating}.')
     pad, corrals = lot_builder() 
-    print(f'there are {len(corrals)} corrals in the lot')
-    
-    for corral_key, corral_value in corrals.items(): # displaying initial set of corrals 
-        print(f'{corral_key}: {corral_value}')
 
-    time.sleep(10)
+    display_lot(corrals) # show initial state of lot
+
+    
+
+    time.sleep(10) # take a breath
 
     #begin parking lot sequence w/ threading 
 
@@ -111,8 +140,20 @@ def main ():
     thread_addition.start()
     thread_subtraction.start()
 
+    try: 
+       while not stop_event.is_set():
+           pass
+    except KeyboardInterrupt: # or if ctrl+c occurs 
+        stop_event.set()
+
     thread_addition.join()
     thread_subtraction.join()
+    
+
+    print("Final state of Parking Lot: ")
+    display_lot(corrals)
+
+
 
 
 if __name__ == '__main__':
