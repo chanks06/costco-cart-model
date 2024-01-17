@@ -6,11 +6,20 @@ import random
 import threading
 import keyboard 
 
-
-
 # PART 1: MODEL SET UP 
 
+stop_event = threading.Event()
 
+def push_to_stop(): 
+    global stop_event 
+    keyboard.wait('space')
+    
+    while True:
+        if keyboard.is_pressed('space'):
+            stop_event.set()
+            print(stop_event)
+            break
+        time.sleep(0.1) 
 
 '''
 FUNCTION 1.a: PARAMETERS 
@@ -55,15 +64,6 @@ FUNCTION 1.d: STOP THREADS
 This function is to stop the program and to display the resulting parking lot 
 '''
 
-stop_event = threading.Event() 
-
-def push_to_stop():
-    global stop_event
-    print("WELCOME TO COSTCO WAREHOUSE #97. Press spacebar to stop program at any time.")
-    while True:
-        if keyboard.is_pressed('space'):
-            stop_event.set()
-            break
 
 
 
@@ -74,7 +74,8 @@ FUNCTION 2.a: cart_addition
 This function will randomly add a cart to a corral every 2 seconds 
 '''
 def cart_addition(corrals): 
-    while True: 
+    global stop_event
+    while not stop_event.is_set(): 
         random_corral = random.choice(list(corrals.keys()))
         corrals[random_corral].append('x')
         print(f'cart added to {random_corral}')
@@ -88,7 +89,8 @@ This function will randomly add a cart to a corral every 5 seconds
 '''
 
 def cart_subtraction(qty_cart_pushers,pad, corrals): 
-    while True: 
+    global stop_event
+    while not stop_event.is_set(): 
         for worker in range(qty_cart_pushers): # for now, this qty is just a number, not specific workers (this feature to be implemented later)
             '''
             I want to have a worker randomly select a corral to pick and take carts from, as soon as corral 
@@ -114,35 +116,32 @@ def cart_subtraction(qty_cart_pushers,pad, corrals):
 
 
 #main 
-def main ():  
-    
-    #starting push_to_stop to listen for keyboard 's' press: 
-    key_thread = threading.Thread(target = push_to_stop)
-    key_thread.start()
+def main (): 
 
     #grabbing parameters for cart simulation
     cart_pushers, busy_rating = model_init()
     pad, corrals = lot_builder() 
 
-    display_lot(corrals) # show initial state of lot
+    print("WELCOME TO COSTCO WAREHOUSE #97. Press spacebar to stop program at any time.")
 
-    
-
-    time.sleep(10) # take a breath
-
-    #begin parking lot sequence w/ threading 
-
+    #creating addition and substraction threads 
     thread_addition = threading.Thread(target=cart_addition, args = (corrals,))
     thread_subtraction = threading.Thread(target=cart_subtraction, args = (cart_pushers, pad, corrals))
+
+    display_lot(corrals) # show initial state of lot
+    time.sleep(5) # take a breath 
+
+    #starting keyboard event thread 
+    stop_thread = threading.Thread(target = push_to_stop, args = ())
+    stop_thread.start()
+
 
     thread_addition.start()
     thread_subtraction.start()
 
-    while not stop_event.is_set(): # while stop_event is not engaged, keep running threads 
-        pass
+    stop_thread.join()
 
-    stop_event.set() 
-
+    stop_event.set() #this stops the program 
 
     thread_addition.join()
     thread_subtraction.join()
@@ -150,7 +149,6 @@ def main ():
 
     print("Final state of Parking Lot: ")
     display_lot(corrals)
-
 
 
 
