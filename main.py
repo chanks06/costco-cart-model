@@ -4,8 +4,9 @@
 import time 
 import random 
 import threading
-import keyboard
- 
+import keyboard 
+
+
 
 # PART 1: MODEL SET UP 
 
@@ -19,8 +20,6 @@ Parameter retrieval function: ask the user the following questions:
 '''
 
 def model_init(): 
-    print('Welcome to the Costco Warehouse #97 Parking Lot.') #welcome the user 
-    
     qty_cart_pushers = int(input('How many cart pushers are working (0 - 6) ?    '))
     busy_rating = int(input('How busy is the warehouse (0 - 10) ?    '))
 
@@ -59,12 +58,12 @@ This function is to stop the program and to display the resulting parking lot
 stop_event = threading.Event() 
 
 def push_to_stop():
-    global stop_threads 
-    try: 
-        keyboard.wait('s')
-        stop_event.set()
-    except Exception as e: 
-        print("error")
+    global stop_event
+    print("WELCOME TO COSTCO WAREHOUSE #97. Press spacebar to stop program at any time.")
+    while True:
+        if keyboard.is_pressed('space'):
+            stop_event.set()
+            break
 
 
 
@@ -117,7 +116,6 @@ def cart_subtraction(qty_cart_pushers,pad, corrals):
 #main 
 def main ():  
     
-
     #starting push_to_stop to listen for keyboard 's' press: 
     key_thread = threading.Thread(target = push_to_stop)
     key_thread.start()
@@ -140,11 +138,11 @@ def main ():
     thread_addition.start()
     thread_subtraction.start()
 
-    try: 
-       while not stop_event.is_set():
-           pass
-    except KeyboardInterrupt: # or if ctrl+c occurs 
-        stop_event.set()
+    while not stop_event.is_set(): # while stop_event is not engaged, keep running threads 
+        pass
+
+    stop_event.set() 
+
 
     thread_addition.join()
     thread_subtraction.join()
