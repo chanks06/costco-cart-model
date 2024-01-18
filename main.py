@@ -31,17 +31,15 @@ Parameter retrieval function: ask the user the following questions:
 def model_init(): 
     while True: 
         try: 
-            qty_cart_pushers = int(input('How many cart pushers are working [0 - 6] ?    '))
-            break
-        except:
+            qty_cart_pushers = int(input('How many cart pushers are working between 0 and 6?    '))
+            if 0 <= qty_cart_pushers <= 6: 
+                break
+            else: 
+                print("Please enter an integer bewteen 0 and 6.")
+
+        except ValueError:
             print("Please enter an integer bewteen 0 and 6.")
-            
-    while not (qty_cart_pushers >= 0 and qty_cart_pushers <= 6): #condition for correct input
-        print("Please enter an integer bewteen 0 and 6.")
-        qty_cart_pushers = int(input('How many cart pushers are working [0 - 6] ?    '))
-    else:
-        pass 
-    
+        
     #### WILL ADD BUSY RATING FEATURE --> busy_rating = int(input('How busy is the warehouse (0 - 10) ?    '))
 
     return qty_cart_pushers #busy_rating
