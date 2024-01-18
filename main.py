@@ -118,11 +118,27 @@ def cart_subtraction(qty_cart_pushers,pad, corrals):
 #main 
 def main (): 
 
+    #Intro statement 
+    print("========================================================================================================")
+    print("WELCOME TO COSTCO WAREHOUSE #97 in Clackamas, OR.")
+    print("This program simulates the movement of shopping carts between the corrals and the pad in the parking lot.")
+    print("========================================================================================================")
+
+    # Pause for 3 seconds
+    time.sleep(3)
+
+    # Print information about carts and corrals with separators
+    print("\nEach cart is represented by an 'x'.")
+    print("\nEach corral is one of twenty-two lists inside the Corral Dictionary.")
+    time.sleep(5)
+    print("\nWhile the program is running, you may press spacebar to stop the simulation and view the final result of the corrals and pad.")
+    print("\nLet us begin!\n")
+
+
+
     #grabbing parameters for cart simulation
     cart_pushers, busy_rating = model_init()
     pad, corrals = lot_builder() 
-
-    print("WELCOME TO COSTCO WAREHOUSE #97. Press spacebar to stop program at any time.")
 
     #creating addition and substraction threads 
     thread_addition = threading.Thread(target=cart_addition, args = (corrals,))
